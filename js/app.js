@@ -1,4 +1,180 @@
-// app.js - Main application logic
+// Initialize the edit campaign page
+async function initEditCampaignPage() {
+    const editForm = document.getElementById('edit-campaign-form');
+    const updateBtn = document.getElementById('update-btn');
+    
+    // Get campaign ID from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const campaignId = urlParams.get('id');
+    
+    if (!campaignId) {
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    // Make sure web3 and contract are initialized
+    if (await initWeb3() && await initContract()) {
+        // If wallet is not connected, show connect button
+        if (!isConnected) {
+            editForm.innerHTML = `
+                <div class="wallet-notice">
+                    <p>Please connect your wallet to edit this campaign</p>
+                    <button id="connect-wallet-btn" class="btn primary-btn">Connect Wallet</button>
+                </div>
+            `;
+            
+            document.getElementById('connect-wallet-btn').addEventListener('click', async () => {
+                if (await connectWallet()) {
+                    window.location.reload();
+                }
+            });
+            
+            return;
+        }
+        
+        // Get campaign details
+        const campaign = await getCampaign(campaignId);
+        
+        if (!campaign) {
+            editForm.innerHTML = '<p>Campaign not found or error loading campaign details.</p>';
+            return;
+        }
+        
+        // Check if current user is the campaign creator
+        if (accounts[0].toLowerCase() !== campaign.creator.toLowerCase()) {
+            editForm.innerHTML = `
+                <div class="wallet-notice">
+                    <p>Only the campaign creator can edit this campaign.</p>
+                    <a href="campaign.html?id=${campaignId}" class="btn secondary-btn">Back to Campaign</a>
+                </div>
+            `;
+            return;
+        }
+        
+        // Fill form with campaign details
+        document.getElementById('campaign-id').value = campaignId;
+        
+        const nameField = document.getElementById('campaign-name');
+        const descriptionField = document.getElementById('campaign-description');
+        const goalField = document.getElementById('campaign-goal');
+        const imageUrlField = document.getElementById('campaign-image');
+        
+        nameField.value = campaign.name;
+        descriptionField.value = campaign.description;
+        goalField.value = campaign.goal;
+        imageUrlField.value = campaign.imageUrl;
+        
+        // Update character counters
+        const nameCharCount = document.getElementById('name-char-count');
+        const descCharCount = document.getElementById('desc-char-count');
+        const urlCharCount = document.getElementById('url-char-count');
+        
+        if (nameCharCount) nameCharCount.textContent = campaign.name.length;
+        if (descCharCount) descCharCount.textContent = campaign.description.length;
+        if (urlCharCount) urlCharCount.textContent = campaign.imageUrl.length;
+        
+        // Show current amount raised
+        const goalHelpText = document.getElementById('goal-help-text');
+        const currentRaised = document.getElementById('current-raised');
+        if (currentRaised) {
+            currentRaised.textContent = campaign.amountRaised;
+            goalField.min = campaign.amountRaised;
+        }
+        
+        // Set up image preview
+        const imagePreview = document.getElementById('image-preview');
+        if (imagePreview && campaign.imageUrl) {
+            imagePreview.src = campaign.imageUrl;
+            imagePreview.onerror = () => {
+                imagePreview.src = 'https://placehold.co/600x400?text=Image+Error';
+            };
+        }
+        
+        // Add character counter events
+        nameField.addEventListener('input', function() {
+            if (nameCharCount) {
+                nameCharCount.textContent = this.value.length;
+                if (this.value.length > 100) {
+                    nameCharCount.style.color = 'red';
+                } else {
+                    nameCharCount.style.color = '';
+                }
+            }
+        });
+        
+        descriptionField.addEventListener('input', function() {
+            if (descCharCount) {
+                descCharCount.textContent = this.value.length;
+                if (this.value.length > 500) {
+                    descCharCount.style.color = 'red';
+                } else {
+                    descCharCount.style.color = '';
+                }
+            }
+        });
+        
+        imageUrlField.addEventListener('input', function() {
+            if (urlCharCount) {
+                urlCharCount.textContent = this.value.length;
+                if (this.value.length > 200) {
+                    urlCharCount.style.color = 'red';
+                } else {
+                    urlCharCount.style.color = '';
+                }
+            }
+            
+            // Update image preview on input
+            if (imagePreview) {
+                imagePreview.src = this.value || 'https://placehold.co/600x400?text=No+Image';
+            }
+        });
+        
+        // Handle form submission
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('campaign-id').value;
+            const name = nameField.value;
+            const description = descriptionField.value;
+            const goal = goalField.value;
+            const imageUrl = imageUrlField.value;
+            
+            // Validate input
+            const validationError = validateCampaignInput(name, description, goal, imageUrl);
+            if (validationError) {
+                alert(validationError);
+                return;
+            }
+            
+            // Check that goal is not less than amount raised
+            if (parseFloat(goal) < parseFloat(campaign.amountRaised)) {
+                alert(`Goal cannot be less than the current amount raised (${campaign.amountRaised} ETH)`);
+                return;
+            }
+            
+            updateBtn.disabled = true;
+            updateBtn.textContent = 'Updating Campaign...';
+            
+            try {
+                const success = await updateCampaign(id, name, description, goal, imageUrl);
+                
+                if (success) {
+                    alert('Campaign updated successfully!');
+                    window.location.href = `campaign.html?id=${id}`;
+                } else {
+                    updateBtn.disabled = false;
+                    updateBtn.textContent = 'Update Campaign';
+                }
+            } catch (error) {
+                console.error("Campaign update error:", error);
+                updateBtn.disabled = false;
+                updateBtn.textContent = 'Update Campaign';
+            }
+        });
+    } else {
+        editForm.innerHTML = '<p>Failed to connect to the blockchain. Please make sure MetaMask is installed and connected to the Sepolia test network.</p>';
+    }
+}// app.js - Main application logic
 
 // Check which page we're on and run the appropriate functions
 document.addEventListener('DOMContentLoaded', async () => {
@@ -16,6 +192,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // If we're on the create campaign page
     else if (path.endsWith('create.html')) {
         initCreatePage();
+    }
+    // If we're on the edit campaign page
+    else if (path.endsWith('edit-campaign.html')) {
+        initEditCampaignPage();
     }
 });
 
@@ -178,6 +358,42 @@ function displayCampaignDetails(campaign) {
     
     // Check if current user is the campaign creator
     if (isConnected && accounts[0].toLowerCase() === campaign.creator.toLowerCase()) {
+        // Create owner actions section before the withdraw section
+        const ownerActionsHTML = `
+            <div class="owner-actions">
+                <h3>Campaign Owner Actions</h3>
+                <p>As the creator of this campaign, you can manage it using these options:</p>
+                <div class="owner-actions-buttons">
+                    <a href="edit-campaign.html?id=${campaign.id}" class="btn primary-btn">Edit Campaign</a>
+                    <button id="toggle-status-btn" class="btn secondary-btn">${campaign.active ? 'Pause Campaign' : 'Activate Campaign'}</button>
+                </div>
+                <p class="owner-actions-note">Note: Pausing a campaign will prevent new donations, but won't affect funds already raised.</p>
+            </div>
+        `;
+        
+        // Insert owner actions section before withdraw section
+        withdrawSection.insertAdjacentHTML('beforebegin', ownerActionsHTML);
+        
+        // Set up the toggle status button
+        const toggleStatusBtn = document.getElementById('toggle-status-btn');
+        toggleStatusBtn.addEventListener('click', async () => {
+            try {
+                toggleStatusBtn.disabled = true;
+                toggleStatusBtn.textContent = 'Processing...';
+                
+                // Call the toggleCampaignStatus function
+                await toggleCampaignStatus(campaign.id);
+                
+                alert(`Campaign ${campaign.active ? 'paused' : 'activated'} successfully!`);
+                window.location.reload();
+            } catch (error) {
+                console.error('Error toggling campaign status:', error);
+                alert('Failed to update campaign status. Please try again.');
+                toggleStatusBtn.disabled = false;
+                toggleStatusBtn.textContent = campaign.active ? 'Pause Campaign' : 'Activate Campaign';
+            }
+        });
+        
         // Show withdraw section for campaign creator
         withdrawSection.style.display = 'block';
         

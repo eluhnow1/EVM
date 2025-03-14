@@ -20,6 +20,14 @@ event FundsWithdrawn:
     recipient: indexed(address)
     amount: uint256
 
+# Event for campaign updates
+event CampaignUpdated:
+    id: indexed(uint256)
+    name: String[100]
+    description: String[500]
+    goal: uint256
+    imageUrl: String[200]
+
 # Campaign struct as a dataclass
 struct Campaign:
     creator: address
@@ -51,12 +59,6 @@ def createCampaign(
 ) -> uint256:
     """
     Create a new fundraising campaign
-    
-    @param _name: Name of the campaign
-    @param _description: Description of the campaign
-    @param _goal: Funding goal in wei
-    @param _imageUrl: URL to campaign image
-    @return: ID of the created campaign
     """
     newCampaign: Campaign = Campaign({
         creator: msg.sender,
@@ -83,12 +85,48 @@ def createCampaign(
     return self.campaignCount - 1
 
 @external
+def updateCampaign(
+    _campaignId: uint256,
+    _name: String[100], 
+    _description: String[500], 
+    _goal: uint256, 
+    _imageUrl: String[200]
+) -> bool:
+    """
+    Update an existing campaign (only creator can update)
+    """
+    assert _campaignId < self.campaignCount, "Campaign does not exist"
+    assert msg.sender == self.campaigns[_campaignId].creator, "Only the creator can update this campaign"
+    
+    # Update campaign details while preserving other data
+    campaign: Campaign = self.campaigns[_campaignId]
+    
+    # If the goal is changed, it must be at least the current amount raised
+    if _goal != campaign.goal:
+        assert _goal >= campaign.amountRaised, "New goal cannot be less than amount already raised"
+    
+    # Update campaign fields
+    self.campaigns[_campaignId].name = _name
+    self.campaigns[_campaignId].description = _description
+    self.campaigns[_campaignId].goal = _goal
+    self.campaigns[_campaignId].imageUrl = _imageUrl
+    
+    # Emit update event
+    log CampaignUpdated(
+        _campaignId,
+        _name,
+        _description,
+        _goal,
+        _imageUrl
+    )
+    
+    return True
+
+@external
 @payable
 def donateToCampaign(_campaignId: uint256):
     """
     Donate to a campaign
-    
-    @param _campaignId: ID of the campaign to donate to
     """
     assert _campaignId < self.campaignCount, "Campaign does not exist"
     assert self.campaigns[_campaignId].active, "Campaign is not active"
@@ -102,8 +140,6 @@ def donateToCampaign(_campaignId: uint256):
 def withdrawFunds(_campaignId: uint256):
     """
     Withdraw funds from a campaign
-    
-    @param _campaignId: ID of the campaign to withdraw funds from
     """
     assert msg.sender == self.campaigns[_campaignId].creator, "Only the creator can withdraw funds"
     assert self.campaigns[_campaignId].amountRaised > 0, "No funds to withdraw"
@@ -119,8 +155,6 @@ def withdrawFunds(_campaignId: uint256):
 def toggleCampaignStatus(_campaignId: uint256):
     """
     Toggle the active status of a campaign
-    
-    @param _campaignId: ID of the campaign to toggle status
     """
     assert msg.sender == self.campaigns[_campaignId].creator, "Only the creator can toggle campaign status"
     self.campaigns[_campaignId].active = not self.campaigns[_campaignId].active
@@ -130,9 +164,6 @@ def toggleCampaignStatus(_campaignId: uint256):
 def getCampaign(_campaignId: uint256) -> (address, String[100], String[500], uint256, uint256, bool, uint256, String[200]):
     """
     Get details of a campaign
-    
-    @param _campaignId: ID of the campaign to get details of
-    @return: Tuple containing campaign details
     """
     assert _campaignId < self.campaignCount, "Campaign does not exist"
     campaign: Campaign = self.campaigns[_campaignId]
@@ -153,8 +184,6 @@ def getCampaign(_campaignId: uint256) -> (address, String[100], String[500], uin
 def getAllCampaigns() -> DynArray[uint256, 100]:
     """
     Get IDs of all campaigns
-    
-    @return: Array of campaign IDs
     """
     allCampaigns: DynArray[uint256, 100] = []
     

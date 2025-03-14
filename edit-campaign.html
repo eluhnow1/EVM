@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Campaign - DeFund Me</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><a href="index.html">DeFund Me</a></h1>
+            <a href="javascript:history.back()" class="btn secondary-btn">Back to Campaign</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h2>Edit Campaign</h2>
+            <form id="edit-campaign-form" class="campaign-form">
+                <input type="hidden" id="campaign-id">
+                
+                <div class="form-group">
+                    <label for="campaign-name">Campaign Name</label>
+                    <input type="text" id="campaign-name" placeholder="Give your campaign a name" required>
+                    <p class="help-text">Maximum 100 characters</p>
+                    <p class="char-count"><span id="name-char-count">0</span>/100</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="campaign-description">Description</label>
+                    <textarea id="campaign-description" placeholder="Describe your campaign" rows="5" required></textarea>
+                    <p class="help-text">Describe your campaign (maximum 500 characters)</p>
+                    <p class="char-count"><span id="desc-char-count">0</span>/500</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="campaign-goal">Funding Goal (ETH)</label>
+                    <input type="number" id="campaign-goal" placeholder="e.g., 1.5" min="0.01" step="0.01" required>
+                    <p class="help-text" id="goal-help-text">Current amount raised: <span id="current-raised">0</span> ETH</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="campaign-image">Image URL</label>
+                    <input type="url" id="campaign-image" placeholder="Paste an image URL" required>
+                    <p class="help-text">
+                        Image URL must be less than 200 characters.
+                        <br>For long URLs, use a direct image service like <a href="https://imgur.com" target="_blank">Imgur</a> instead.
+                    </p>
+                    <p class="char-count"><span id="url-char-count">0</span>/200</p>
+                    <div class="image-preview">
+                        <p>Image Preview:</p>
+                        <img id="image-preview" src="https://placehold.co/600x400?text=No+Image" alt="Preview">
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" id="update-btn" class="btn primary-btn">Update Campaign</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 DeFund Me. A decentralized fundraising platform.</p>
+        </div>
+    </footer>
+
+    <script src="js/web3.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
