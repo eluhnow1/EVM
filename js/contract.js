@@ -1,305 +1,127 @@
 // contract.js - Handles contract interaction
 
-// Contract ABI (will be replaced with the actual ABI after compilation)
+// Contract ABI (cleaned up to fix tuple type issues)
 const contractABI = [
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "creator",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "name",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "goal",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "imageUrl",
-				"type": "string"
-			}
-		],
-		"name": "CampaignCreated",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_name",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_description",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_goal",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "_imageUrl",
-				"type": "string"
-			}
-		],
-		"name": "createCampaign",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_campaignId",
-				"type": "uint256"
-			}
-		],
-		"name": "donateToCampaign",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "campaignId",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "donor",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "DonationReceived",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "campaignId",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "recipient",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "FundsWithdrawn",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_campaignId",
-				"type": "uint256"
-			}
-		],
-		"name": "toggleCampaignStatus",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_campaignId",
-				"type": "uint256"
-			}
-		],
-		"name": "withdrawFunds",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "campaignCount",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "campaigns",
-		"outputs": [
-			{
-				"internalType": "address payable",
-				"name": "creator",
-				"type": "address"
-			},
-			{
-				"internalType": "string",
-				"name": "name",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "description",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "goal",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "amountRaised",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "active",
-				"type": "bool"
-			},
-			{
-				"internalType": "uint256",
-				"name": "createdAt",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "imageUrl",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getAllCampaigns",
-		"outputs": [
-			{
-				"internalType": "uint256[]",
-				"name": "",
-				"type": "uint256[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_campaignId",
-				"type": "uint256"
-			}
-		],
-		"name": "getCampaign",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "creator",
-				"type": "address"
-			},
-			{
-				"internalType": "string",
-				"name": "name",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "description",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "goal",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "amountRaised",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "active",
-				"type": "bool"
-			},
-			{
-				"internalType": "uint256",
-				"name": "createdAt",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "imageUrl",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	}
+    {
+        "type": "event",
+        "name": "CampaignCreated",
+        "inputs": [
+            {"name": "id", "type": "uint256", "indexed": false},
+            {"name": "creator", "type": "address", "indexed": true},
+            {"name": "name", "type": "string", "indexed": false},
+            {"name": "goal", "type": "uint256", "indexed": false},
+            {"name": "imageUrl", "type": "string", "indexed": false}
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "DonationReceived",
+        "inputs": [
+            {"name": "campaignId", "type": "uint256", "indexed": true},
+            {"name": "donor", "type": "address", "indexed": true},
+            {"name": "amount", "type": "uint256", "indexed": false}
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "FundsWithdrawn",
+        "inputs": [
+            {"name": "campaignId", "type": "uint256", "indexed": true},
+            {"name": "recipient", "type": "address", "indexed": true},
+            {"name": "amount", "type": "uint256", "indexed": false}
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "constructor",
+        "stateMutability": "nonpayable",
+        "inputs": []
+    },
+    {
+        "type": "function",
+        "name": "createCampaign",
+        "stateMutability": "nonpayable",
+        "inputs": [
+            {"name": "_name", "type": "string"},
+            {"name": "_description", "type": "string"},
+            {"name": "_goal", "type": "uint256"},
+            {"name": "_imageUrl", "type": "string"}
+        ],
+        "outputs": [{"name": "", "type": "uint256"}]
+    },
+    {
+        "type": "function",
+        "name": "donateToCampaign",
+        "stateMutability": "payable",
+        "inputs": [{"name": "_campaignId", "type": "uint256"}],
+        "outputs": []
+    },
+    {
+        "type": "function",
+        "name": "withdrawFunds",
+        "stateMutability": "nonpayable",
+        "inputs": [{"name": "_campaignId", "type": "uint256"}],
+        "outputs": []
+    },
+    {
+        "type": "function",
+        "name": "toggleCampaignStatus",
+        "stateMutability": "nonpayable",
+        "inputs": [{"name": "_campaignId", "type": "uint256"}],
+        "outputs": []
+    },
+    {
+        "type": "function",
+        "name": "getCampaign",
+        "stateMutability": "view",
+        "inputs": [{"name": "_campaignId", "type": "uint256"}],
+        "outputs": [
+            {"name": "", "type": "address"},
+            {"name": "", "type": "string"},
+            {"name": "", "type": "string"},
+            {"name": "", "type": "uint256"},
+            {"name": "", "type": "uint256"},
+            {"name": "", "type": "bool"},
+            {"name": "", "type": "uint256"},
+            {"name": "", "type": "string"}
+        ]
+    },
+    {
+        "type": "function",
+        "name": "getAllCampaigns",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [{"name": "", "type": "uint256[]"}]
+    },
+    {
+        "type": "function",
+        "name": "campaigns",
+        "stateMutability": "view",
+        "inputs": [{"name": "arg0", "type": "uint256"}],
+        "outputs": [
+            {"name": "creator", "type": "address"},
+            {"name": "name", "type": "string"},
+            {"name": "description", "type": "string"},
+            {"name": "goal", "type": "uint256"},
+            {"name": "amountRaised", "type": "uint256"},
+            {"name": "active", "type": "bool"},
+            {"name": "createdAt", "type": "uint256"},
+            {"name": "imageUrl", "type": "string"}
+        ]
+    },
+    {
+        "type": "function",
+        "name": "campaignCount",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [{"name": "", "type": "uint256"}]
+    }
 ];
 
 // Contract address (will be filled after deployment)
-const contractAddress = "0x6B8f2858F3205254C58b9fC2f7cf16fF37cD5101"; // Replace with actual contract address after deployment
+const contractAddress = "0x04029EC0a8361043D3E4Eb024FFe85A497D7ffB4"; 
 
 let fundraiserContract;
 
@@ -374,15 +196,42 @@ async function createCampaign(name, description, goal, imageUrl) {
     }
     
     try {
+        // Convert goal to Wei
         const goalInWei = web3.utils.toWei(goal.toString(), 'ether');
         
+        // Estimate gas first to check if the transaction is likely to succeed
+        const gasEstimate = await fundraiserContract.methods
+            .createCampaign(name, description, goalInWei, imageUrl)
+            .estimateGas({ from: accounts[0] })
+            .catch(error => {
+                console.error("Gas estimation failed:", error);
+                throw new Error("This transaction is likely to fail. Please check your inputs or contract state.");
+            });
+        
+        // Add 30% buffer to gas estimate for safety
+        const gasLimit = Math.floor(gasEstimate * 1.3);
+        
+        console.log("Transaction details:", {
+            name: name,
+            description: description,
+            goalInWei: goalInWei,
+            imageUrl: imageUrl,
+            estimatedGas: gasEstimate,
+            gasLimit: gasLimit
+        });
+        
+        // Send transaction with higher gas limit
         const result = await fundraiserContract.methods
             .createCampaign(name, description, goalInWei, imageUrl)
-            .send({ from: accounts[0] });
+            .send({ 
+                from: accounts[0],
+                gas: gasLimit
+            });
         
         return result;
     } catch (error) {
         console.error("Error creating campaign:", error);
+        alert("Transaction failed: " + (error.message || "Unknown error"));
         return false;
     }
 }
@@ -397,13 +246,41 @@ async function donateToCampaign(id, amount) {
     try {
         const amountInWei = web3.utils.toWei(amount.toString(), 'ether');
         
+        // Estimate gas first
+        const gasEstimate = await fundraiserContract.methods
+            .donateToCampaign(id)
+            .estimateGas({ 
+                from: accounts[0], 
+                value: amountInWei 
+            })
+            .catch(error => {
+                console.error("Gas estimation failed:", error);
+                throw new Error("This donation is likely to fail. Please check your inputs or try a different amount.");
+            });
+        
+        // Add 30% buffer to gas estimate
+        const gasLimit = Math.floor(gasEstimate * 1.3);
+        
+        console.log("Donation details:", {
+            campaignId: id,
+            amountInWei: amountInWei,
+            estimatedGas: gasEstimate,
+            gasLimit: gasLimit
+        });
+        
+        // Send transaction with higher gas limit
         const result = await fundraiserContract.methods
             .donateToCampaign(id)
-            .send({ from: accounts[0], value: amountInWei });
+            .send({ 
+                from: accounts[0], 
+                value: amountInWei,
+                gas: gasLimit 
+            });
         
         return result;
     } catch (error) {
         console.error("Error donating to campaign:", error);
+        alert("Donation failed: " + (error.message || "Unknown error"));
         return false;
     }
 }
@@ -416,15 +293,75 @@ async function withdrawCampaignFunds(id) {
     }
     
     try {
+        // Get campaign details to check if there are funds to withdraw
+        const campaign = await getCampaign(id);
+        if (parseFloat(campaign.amountRaised) <= 0) {
+            alert("No funds available to withdraw");
+            return false;
+        }
+        
+        // Estimate gas first
+        const gasEstimate = await fundraiserContract.methods
+            .withdrawFunds(id)
+            .estimateGas({ from: accounts[0] })
+            .catch(error => {
+                console.error("Gas estimation failed:", error);
+                throw new Error("Withdraw transaction is likely to fail. You may not be the campaign creator or there are no funds to withdraw.");
+            });
+        
+        // Add 30% buffer to gas estimate
+        const gasLimit = Math.floor(gasEstimate * 1.3);
+        
+        console.log("Withdraw details:", {
+            campaignId: id,
+            estimatedGas: gasEstimate,
+            gasLimit: gasLimit
+        });
+        
+        // Send transaction with higher gas limit
         const result = await fundraiserContract.methods
             .withdrawFunds(id)
-            .send({ from: accounts[0] });
+            .send({ 
+                from: accounts[0],
+                gas: gasLimit 
+            });
         
         return result;
     } catch (error) {
         console.error("Error withdrawing funds:", error);
+        alert("Withdrawal failed: " + (error.message || "Unknown error"));
         throw error; // Rethrow to handle in the UI
     }
+}
+
+// Utility function to validate campaign input
+function validateCampaignInput(name, description, goal, imageUrl) {
+    // Check for empty fields
+    if (!name || !description || !goal || !imageUrl) {
+        return "All fields are required";
+    }
+    
+    // Check name length (Vyper has String[100] limit)
+    if (name.length > 100) {
+        return "Name must be less than 100 characters";
+    }
+    
+    // Check description length (Vyper has String[500] limit)
+    if (description.length > 500) {
+        return "Description must be less than 500 characters";
+    }
+    
+    // Check imageUrl length (Vyper has String[200] limit)
+    if (imageUrl.length > 200) {
+        return "Image URL is too long (maximum 200 characters). Please use a shorter URL or an image hosting service like imgur.com";
+    }
+    
+    // Check goal is a positive number
+    if (isNaN(goal) || parseFloat(goal) <= 0) {
+        return "Goal must be a positive number";
+    }
+    
+    return null; // No errors
 }
 
 // Initialize contract when page loads

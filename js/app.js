@@ -56,10 +56,13 @@ function displayCampaigns(campaigns) {
         
         const progressPercentage = (campaign.amountRaised / campaign.goal) * 100;
         
+        // Check if image URL exists and handles image error
+        const imageUrl = campaign.imageUrl || 'https://placehold.co/600x400?text=No+Image';
+        
         const campaignCard = document.createElement('div');
         campaignCard.className = 'campaign-card';
         campaignCard.innerHTML = `
-            <img src="${campaign.imageUrl}" alt="${campaign.name}" class="campaign-image">
+            <img src="${imageUrl}" alt="${campaign.name}" class="campaign-image" onerror="this.src='https://placehold.co/600x400?text=Image+Error'">
             <div class="campaign-info">
                 <h3>${campaign.name}</h3>
                 <div class="campaign-progress">
@@ -146,8 +149,11 @@ function displayCampaignDetails(campaign) {
     const withdrawSection = document.getElementById('withdraw-section');
     const progressPercentage = (campaign.amountRaised / campaign.goal) * 100;
     
+    // Check if image URL exists and handles image error
+    const imageUrl = campaign.imageUrl || 'https://placehold.co/600x400?text=No+Image';
+    
     campaignDetails.innerHTML = `
-        <img src="${campaign.imageUrl}" alt="${campaign.name}" class="campaign-details-image">
+        <img src="${imageUrl}" alt="${campaign.name}" class="campaign-details-image" onerror="this.src='https://placehold.co/600x400?text=Image+Error'">
         <div class="campaign-details-info">
             <h2>${campaign.name}</h2>
             <div class="campaign-progress">
@@ -248,6 +254,69 @@ async function initCreatePage() {
             return;
         }
         
+        // Add help text and limits for fields
+        const descriptionField = document.getElementById('campaign-description');
+        if (descriptionField) {
+            descriptionField.maxLength = 500;
+            
+            // Add help text if it doesn't exist
+            const descParent = descriptionField.parentElement;
+            let helpText = descParent.querySelector('.help-text');
+            if (!helpText) {
+                helpText = document.createElement('p');
+                helpText.className = 'help-text';
+                descParent.appendChild(helpText);
+            }
+            helpText.textContent = 'Describe your campaign (maximum 500 characters)';
+        }
+        
+        const nameField = document.getElementById('campaign-name');
+        if (nameField) {
+            nameField.maxLength = 100;
+            
+            // Add help text if it doesn't exist
+            const nameParent = nameField.parentElement;
+            let helpText = nameParent.querySelector('.help-text');
+            if (!helpText) {
+                helpText = document.createElement('p');
+                helpText.className = 'help-text';
+                nameParent.appendChild(helpText);
+            }
+            helpText.textContent = 'Maximum 100 characters';
+        }
+        
+        const imageUrlField = document.getElementById('campaign-image');
+        if (imageUrlField) {
+            imageUrlField.maxLength = 200;
+            
+            // Add help text if it doesn't exist
+            const imgParent = imageUrlField.parentElement;
+            let helpText = imgParent.querySelector('.help-text');
+            if (!helpText) {
+                helpText = document.createElement('p');
+                helpText.className = 'help-text';
+                imgParent.appendChild(helpText);
+            }
+            
+            // Update help text with more specific guidance
+            helpText.innerHTML = `Image URL must be less than 200 characters. 
+                <br>For LinkedIn images, use a direct image service like <a href="https://imgur.com" target="_blank">Imgur</a> instead.
+                <br>URL character count: <span id="url-char-count">0</span>/200`;
+            
+            // Add character counter
+            imageUrlField.addEventListener('input', function() {
+                const charCount = document.getElementById('url-char-count');
+                if (charCount) {
+                    charCount.textContent = this.value.length;
+                    if (this.value.length > 200) {
+                        charCount.style.color = 'red';
+                    } else {
+                        charCount.style.color = '';
+                    }
+                }
+            });
+        }
+        
         // Handle form submission
         createForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -257,21 +326,28 @@ async function initCreatePage() {
             const goal = document.getElementById('campaign-goal').value;
             const imageUrl = document.getElementById('campaign-image').value;
             
-            if (!name || !description || !goal || !imageUrl) {
-                alert('Please fill in all fields');
+            // Validate input
+            const validationError = validateCampaignInput(name, description, goal, imageUrl);
+            if (validationError) {
+                alert(validationError);
                 return;
             }
             
             createBtn.disabled = true;
             createBtn.textContent = 'Creating Campaign...';
             
-            const success = await createCampaign(name, description, goal, imageUrl);
-            
-            if (success) {
-                alert('Campaign created successfully!');
-                window.location.href = 'index.html';
-            } else {
-                alert('Failed to create campaign. Please try again.');
+            try {
+                const success = await createCampaign(name, description, goal, imageUrl);
+                
+                if (success) {
+                    alert('Campaign created successfully!');
+                    window.location.href = 'index.html';
+                } else {
+                    createBtn.disabled = false;
+                    createBtn.textContent = 'Create Campaign';
+                }
+            } catch (error) {
+                console.error("Campaign creation error:", error);
                 createBtn.disabled = false;
                 createBtn.textContent = 'Create Campaign';
             }
