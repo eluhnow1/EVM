@@ -6,55 +6,362 @@
     <title>Create Campaign - DeFund Me</title>
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+    <!-- Add Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1><a href="index.html">DeFund Me</a></h1>
-            <a href="index.html" class="btn secondary-btn">Back to Campaigns</a>
+    <!-- Include SVG icons -->
+    <div id="svg-icons" class="hidden"></div>
+
+    <header class="header">
+        <div class="navbar">
+            <div class="container navbar__container">
+                <a href="index.html" class="navbar__brand">
+                    <svg class="icon navbar__logo" aria-hidden="true">
+                        <use xlink:href="#icon-ethereum"></use>
+                    </svg>
+                    DeFund Me
+                </a>
+                <div class="navbar__menu">
+                    <a href="index.html" class="navbar__link">Home</a>
+                    <a href="#" class="navbar__link">About</a>
+                    <a href="#" class="navbar__link">How It Works</a>
+                </div>
+                <div class="navbar__actions">
+                    <a href="index.html" class="btn btn--secondary">
+                        <svg class="icon btn-icon" aria-hidden="true">
+                            <use xlink:href="#icon-home"></use>
+                        </svg>
+                        All Campaigns
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="header__wave">
+            <svg preserveAspectRatio="none" width="100%" height="100%" viewBox="0 0 1440 100" fill="white">
+                <path d="M0,64L60,58.7C120,53,240,43,360,42.7C480,43,600,53,720,58.7C840,64,960,64,1080,58.7C1200,53,1320,43,1380,37.3L1440,32L1440,100L1380,100C1320,100,1200,100,1080,100C960,100,840,100,720,100C600,100,480,100,360,100C240,100,120,100,60,100L0,100Z"></path>
+            </svg>
         </div>
     </header>
 
     <main>
-        <div class="container">
-            <h2>Create a New Campaign</h2>
-            <form id="create-campaign-form" class="campaign-form">
-                <div class="form-group">
-                    <label for="campaign-name">Campaign Name</label>
-                    <input type="text" id="campaign-name" placeholder="Give your campaign a name" required>
-                </div>
+        <section class="create-campaign">
+            <div class="container">
+                <h1 class="section-title">Create a New Campaign</h1>
                 
-                <div class="form-group">
-                    <label for="campaign-description">Description</label>
-                    <textarea id="campaign-description" placeholder="Describe your campaign" rows="5" required></textarea>
+                <div id="create-campaign-form-container" class="animate-fade-in">
+                    <form id="create-campaign-form" class="form">
+                        <div class="form__group">
+                            <label for="campaign-name" class="form__label">Campaign Name</label>
+                            <input type="text" id="campaign-name" class="form__control" placeholder="Give your campaign a name" maxlength="100" required>
+                            <div class="form__help">Be clear and descriptive</div>
+                            <div class="form__char-count"><span id="name-char-count">0</span>/100</div>
+                        </div>
+                        
+                        <div class="form__group">
+                            <label for="campaign-description" class="form__label">Description</label>
+                            <textarea id="campaign-description" class="form__control" placeholder="Describe your campaign in detail" rows="5" maxlength="500" required></textarea>
+                            <div class="form__help">Explain what the funds will be used for and why people should donate</div>
+                            <div class="form__char-count"><span id="desc-char-count">0</span>/500</div>
+                        </div>
+                        
+                        <div class="form__group">
+                            <label for="campaign-goal" class="form__label">Funding Goal (ETH)</label>
+                            <input type="number" id="campaign-goal" class="form__control" placeholder="e.g., 1.5" min="0.01" step="0.01" required>
+                            <div class="form__help">Set a realistic goal for your campaign</div>
+                        </div>
+                        
+                        <div class="form__group">
+                            <label for="campaign-image" class="form__label">Image URL</label>
+                            <input type="url" id="campaign-image" class="form__control" placeholder="Paste an image URL" maxlength="200" required>
+                            <div class="form__help">
+                                Provide a URL to an image that represents your campaign<br>
+                                For long URLs, use a direct image service like <a href="https://imgur.com" target="_blank" rel="noopener">Imgur</a>
+                            </div>
+                            <div class="form__char-count"><span id="url-char-count">0</span>/200</div>
+                            
+                            <div class="form__preview">
+                                <p class="form__preview-label">Image Preview:</p>
+                                <img id="image-preview" class="form__preview-image" src="https://placehold.co/600x400?text=No+Image" alt="Preview">
+                            </div>
+                        </div>
+                        
+                        <div class="form__actions">
+                            <button type="submit" id="create-btn" class="btn btn--primary">
+                                <svg class="icon btn-icon" aria-hidden="true">
+                                    <use xlink:href="#icon-plus"></use>
+                                </svg>
+                                Create Campaign
+                            </button>
+                            <a href="index.html" class="btn btn--secondary">Cancel</a>
+                        </div>
+                    </form>
                 </div>
-                
-                <div class="form-group">
-                    <label for="campaign-goal">Funding Goal (ETH)</label>
-                    <input type="number" id="campaign-goal" placeholder="e.g., 1.5" min="0.01" step="0.01" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="campaign-image">Image URL</label>
-                    <input type="url" id="campaign-image" placeholder="Paste an image URL" required>
-                    <p class="help-text">Provide a URL to an image that represents your campaign.</p>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" id="create-btn" class="btn primary-btn">Create Campaign</button>
-                </div>
-            </form>
-        </div>
+            </div>
+        </section>
     </main>
 
-    <footer>
+    <footer class="footer">
+        <div class="footer__wave">
+            <svg preserveAspectRatio="none" width="100%" height="100%" viewBox="0 0 1440 100" fill="var(--gray-100)">
+                <path d="M0,64L60,58.7C120,53,240,43,360,42.7C480,43,600,53,720,58.7C840,64,960,64,1080,58.7C1200,53,1320,43,1380,37.3L1440,32L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
+            </svg>
+        </div>
         <div class="container">
-            <p>&copy; 2025 DeFund Me. A decentralized fundraising platform.</p>
+            <div class="footer__content">
+                <div class="footer__logo">DeFund Me</div>
+                <p class="footer__tagline">A decentralized fundraising platform powered by Ethereum</p>
+                
+                <div class="footer__links">
+                    <a href="#" class="footer__link">Privacy Policy</a>
+                    <a href="#" class="footer__link">Terms of Service</a>
+                    <a href="#" class="footer__link">Contact</a>
+                    <a href="#" class="footer__link">About</a>
+                </div>
+                
+                <div class="footer__social">
+                    <a href="#" class="footer__social-item" aria-label="Twitter">
+                        <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-twitter"></use>
+                        </svg>
+                    </a>
+                    <a href="#" class="footer__social-item" aria-label="GitHub">
+                        <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-github"></use>
+                        </svg>
+                    </a>
+                    <a href="#" class="footer__social-item" aria-label="Discord">
+                        <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-discord"></use>
+                        </svg>
+                    </a>
+                </div>
+                
+                <p class="footer__copyright">&copy; 2025 DeFund Me. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 
     <script src="js/web3.js"></script>
     <script src="js/contract.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/ui.js"></script>
+    
+    <!-- Load SVG Icons -->
+    <script>
+        // Load SVG icons
+        fetch('icons.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('svg-icons').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading SVG icons:', error);
+            });
+    </script>
+
+    <!-- Enhanced create page script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add character counters
+            const nameField = document.getElementById('campaign-name');
+            const descField = document.getElementById('campaign-description');
+            const imageUrlField = document.getElementById('campaign-image');
+            
+            // Name field counter
+            nameField.addEventListener('input', function() {
+                const count = this.value.length;
+                const countEl = document.getElementById('name-char-count');
+                if (countEl) {
+                    countEl.textContent = count;
+                    if (count > 80) { // Show warning when close to limit
+                        countEl.parentElement.classList.add('form__char-count--limit');
+                    } else {
+                        countEl.parentElement.classList.remove('form__char-count--limit');
+                    }
+                }
+            });
+            
+            // Description field counter
+            descField.addEventListener('input', function() {
+                const count = this.value.length;
+                const countEl = document.getElementById('desc-char-count');
+                if (countEl) {
+                    countEl.textContent = count;
+                    if (count > 400) { // Show warning when close to limit
+                        countEl.parentElement.classList.add('form__char-count--limit');
+                    } else {
+                        countEl.parentElement.classList.remove('form__char-count--limit');
+                    }
+                }
+            });
+            
+            // Image URL field counter and preview
+            imageUrlField.addEventListener('input', function() {
+                const count = this.value.length;
+                const countEl = document.getElementById('url-char-count');
+                if (countEl) {
+                    countEl.textContent = count;
+                    if (count > 160) { // Show warning when close to limit
+                        countEl.parentElement.classList.add('form__char-count--limit');
+                    } else {
+                        countEl.parentElement.classList.remove('form__char-count--limit');
+                    }
+                }
+                
+                // Update image preview
+                const previewImg = document.getElementById('image-preview');
+                if (previewImg) {
+                    if (this.value) {
+                        previewImg.src = this.value;
+                        // Handle image load errors
+                        previewImg.onerror = function() {
+                            this.src = 'https://placehold.co/600x400?text=Image+Error';
+                        };
+                    } else {
+                        previewImg.src = 'https://placehold.co/600x400?text=No+Image';
+                    }
+                }
+            });
+            
+            // Initialize form counters
+            nameField.dispatchEvent(new Event('input'));
+            descField.dispatchEvent(new Event('input'));
+            imageUrlField.dispatchEvent(new Event('input'));
+            
+            // Override initCreatePage function
+            window.initCreatePage = async function() {
+                const createForm = document.getElementById('create-campaign-form');
+                const createFormContainer = document.getElementById('create-campaign-form-container');
+                const createBtn = document.getElementById('create-btn');
+                
+                // Make sure web3 and contract are initialized
+                if (await initWeb3() && await initContract()) {
+                    // If wallet is not connected, show connect button
+                    if (!isConnected) {
+                        createFormContainer.innerHTML = `
+                            <div class="wallet-notice animate-fade-in">
+                                <h3 class="wallet-notice__title">Wallet Connection Required</h3>
+                                <p class="wallet-notice__text">Please connect your wallet to create a campaign.</p>
+                                <button id="connect-wallet-btn" class="btn btn--primary">
+                                    <svg class="icon btn-icon" aria-hidden="true">
+                                        <use xlink:href="#icon-wallet"></use>
+                                    </svg>
+                                    Connect Wallet
+                                </button>
+                            </div>
+                        `;
+                        
+                        document.getElementById('connect-wallet-btn').addEventListener('click', async () => {
+                            if (await connectWallet()) {
+                                window.location.reload();
+                            }
+                        });
+                        
+                        return;
+                    }
+                    
+                    // Handle form submission
+                    createForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        
+                        const name = document.getElementById('campaign-name').value;
+                        const description = document.getElementById('campaign-description').value;
+                        const goal = document.getElementById('campaign-goal').value;
+                        const imageUrl = document.getElementById('campaign-image').value;
+                        
+                        // Validate input
+                        const validationError = validateCampaignInput(name, description, goal, imageUrl);
+                        if (validationError) {
+                            window.showToast(validationError, 'error');
+                            return;
+                        }
+                        
+                        createBtn.disabled = true;
+                        createBtn.innerHTML = `
+                            <svg class="icon icon--loading btn-icon" aria-hidden="true">
+                                <use xlink:href="#icon-loading"></use>
+                            </svg>
+                            Creating Campaign...
+                        `;
+                        
+                        try {
+                            const success = await createCampaign(name, description, goal, imageUrl);
+                            
+                            if (success) {
+                                window.showToast('Campaign created successfully!', 'success');
+                                
+                                // Show success state before redirecting
+                                createFormContainer.innerHTML = `
+                                    <div class="success-message animate-fade-in">
+                                        <svg class="icon icon--lg" aria-hidden="true">
+                                            <use xlink:href="#icon-check"></use>
+                                        </svg>
+                                        <h2>Campaign Created Successfully!</h2>
+                                        <p>Your campaign has been created and is now live. Redirecting to home page...</p>
+                                    </div>
+                                `;
+                                
+                                // Style for success message
+                                const style = document.createElement('style');
+                                style.textContent = `
+                                    .success-message {
+                                        text-align: center;
+                                        padding: 3rem;
+                                        background-color: white;
+                                        border-radius: var(--radius-lg);
+                                        box-shadow: var(--shadow);
+                                    }
+                                    .success-message .icon {
+                                        width: 4rem;
+                                        height: 4rem;
+                                        color: var(--success);
+                                        margin-bottom: 1.5rem;
+                                    }
+                                `;
+                                document.head.appendChild(style);
+                                
+                                // Redirect after delay
+                                setTimeout(() => {
+                                    window.location.href = 'index.html';
+                                }, 2000);
+                            } else {
+                                createBtn.disabled = false;
+                                createBtn.innerHTML = `
+                                    <svg class="icon btn-icon" aria-hidden="true">
+                                        <use xlink:href="#icon-plus"></use>
+                                    </svg>
+                                    Create Campaign
+                                `;
+                            }
+                        } catch (error) {
+                            console.error("Campaign creation error:", error);
+                            window.showToast(`Error creating campaign: ${error.message || 'Unknown error'}`, 'error');
+                            createBtn.disabled = false;
+                            createBtn.innerHTML = `
+                                <svg class="icon btn-icon" aria-hidden="true">
+                                    <use xlink:href="#icon-plus"></use>
+                                </svg>
+                                Create Campaign
+                            `;
+                        }
+                    });
+                } else {
+                    createFormContainer.innerHTML = `
+                        <div class="wallet-notice animate-fade-in">
+                            <h3 class="wallet-notice__title">Connection Error</h3>
+                            <p class="wallet-notice__text">Failed to connect to the blockchain. Please make sure MetaMask is installed and connected to the Sepolia test network.</p>
+                            <a href="https://metamask.io/" target="_blank" rel="noopener" class="btn btn--primary">
+                                Get MetaMask
+                            </a>
+                        </div>
+                    `;
+                }
+            };
+        });
+    </script>
 </body>
 </html>
